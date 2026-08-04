@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengumpulan Penugasan SKI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --primary: #059669; /* Warna Emerald / Hijau Zamrud */
+            --primary-light: #ECFDF5; /* Background terang hijau */
+            --bg-color: #F8FAFC;
+            --card-bg: #FFFFFF;
+            --text-main: #1E293B;
+            --text-muted: #64748B;
+            --border: #E2E8F0;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-main); min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; }
+        .container { width: 100%; max-width: 750px; background: var(--card-bg); border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid var(--border); }
+        .header { background: linear-gradient(135deg, #059669 0%, #047857 100%); color: white; padding: 30px; text-align: center; }
+        .header h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+        .header p { font-size: 14px; opacity: 0.9; }
+        .content { padding: 30px; }
+        .form-group { margin-bottom: 20px; text-align: left; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 8px; font-size: 14px; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 12px 16px; border: 1px solid var(--border); border-radius: 8px; font-size: 15px; outline: none; background-color: #FFFFFF; color: var(--text-main); }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--primary); }
+        .form-group textarea { resize: vertical; min-height: 120px; }
+        .instruction-box { background: var(--primary-light); border: 1px solid #A7F3D0; border-radius: 8px; padding: 15px; margin-bottom: 20px; font-size: 14px; color: #065F46; line-height: 1.5; display: none; }
+        .btn { background-color: var(--primary); color: white; border: none; padding: 14px 24px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; transition: background 0.2s; }
+        .btn:hover { background-color: #047857; }
+        .btn:disabled { background-color: #CBD5E1; cursor: not-allowed; }
+        .success-box { text-align: center; padding: 30px 0; display: none; }
+        .success-icon { font-size: 60px; color: var(--primary); margin-bottom: 20px; }
+        .success-title { font-size: 22px; font-weight: 700; margin-bottom: 10px; }
+        .success-desc { color: var(--text-muted); font-size: 15px; margin-bottom: 30px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>Pengumpulan Penugasan SKI</h1>
+        <p>Kirimkan hasil tugas atau tautan pekerjaan Anda di sini</p>
+    </div>
+    
+    <div class="content">
+        <!-- Form Pengiriman Tugas -->
+        <div id="form-screen">
+            <div class="form-group">
+                <label for="student-name">Nama Lengkap</label>
+                <input type="text" id="student-name" placeholder="Contoh: Ahmad Fauzan">
+            </div>
+
+            <div class="form-group">
+                <label for="student-class">Pilih Kelas</label>
+                <select id="student-class" onchange="handleClassChange()">
+                    <option value="" disabled selected>-- Pilih Kelas Anda --</option>
+                    <option value="7A">7A</option>
+                    <option value="7B">7B</option>
+                    <option value="7C">7C</option>
+                    <option value="8A">8A</option>
+                    <option value="8B">8B</option>
+                    <option value="8C">8C</option>
+                    <option value="9A">9A</option>
+                    <option value="9B">9B</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="assignment-title">Pilih Judul Penugasan</label>
+                <select id="assignment-title" onchange="showInstruction()" disabled>
+                    <option value="" disabled selected>-- Pilih Kelas Terlebih Dahulu --</option>
+                </select>
+            </div>
+
+            <div class="instruction-box" id="instruction-box">
+                <strong>Deskripsi / Instruksi Tugas:</strong><br>
+                <span id="instruction-text">Silakan baca instruksi dari guru dan masukkan jawaban atau tautan file tugas Anda di bawah ini.</span>
+            </div>
+
+            <div class="form-group">
+                <label for="assignment-answer">Jawaban / Tautan File Tugas (Google Drive / Teks)</label>
+                <textarea id="assignment-answer" placeholder="Tuliskan jawaban uraian di sini, atau tempelkan (paste) link Google Drive jika mengumpulkan dalam bentuk file dokumen/foto..."></textarea>
+            </div>
+
+            <button class="btn" id="submit-btn" onclick="submitTask()" disabled>Kirim Tugas</button>
+        </div>
+
+        <!-- Tampilan Sukses -->
+        <div id="success-screen" class="success-box">
+            <div class="success-icon"><i class="fa-solid fa-circle-check"></i></div>
+            <div class="success-title">Tugas Berhasil Dikirim!</div>
+            <p class="success-desc">Alhamdulillah, lembar penugasan Anda telah terekam secara otomatis di sistem guru.</p>
+            <button class="btn" onclick="resetForm()">Kirim Tugas Lain / Baru</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // MASUKKAN URL GOOGLE APPS SCRIPT WEB APP KHUSUS PENUGASAN DI SINI
+    const SCRIPT_URL_TUGAS = 'https://script.google.com/macros/s/AKfycbznd4dKKtXOj5jSbZdxTXF5w3IJMuNZXq2IZCjLfTMyondmtWDhW3ZHi2cOdGSHTbEB/exec';
+
+    // Daftar tugas lengkap Kelas 7, Kelas 8, dan Kelas 9
+    const tasksByGrade = {
+        "7": [
+            // KELAS 7 - BAB 1
+            { 
+                title: "Bab 1 - Tugas 1 : Menganalisis Cermin Jahiliyah", 
+                instruction: "Pilihlah salah satu kebiasaan buruk masyarakat Jahiliyah (contoh: mengubur anak perempuan, mabuk, berperang antar suku). Jelaskan nilai-nilai cinta yang hilang dari kebiasaan tersebut, sebutkan satu contoh perilaku di zaman sekarang yang mirip, dan cara menolaknya dengan meneladani akhlak cinta Rasulullah Saw."
+            },
+            { 
+                title: "Bab 1 - Tugas 2 : Peta Konsep Dakwah Penuh Cinta", 
+                instruction: "Buatlah peta konsep sederhana 'Dakwah Cinta Nabi di Mekah' dengan cabang: Kondisi Awal, Dakwah Rahasia, Dakwah Terang-terangan, Tantangan, dan Kunci Keberhasilan. Unggah file peta konsep ke Google Drive dan tempelkan link-nya di bawah."
+            },
+            { 
+                title: "Bab 1 - Tugas 3 : Menemukan Cinta dalam Diri", 
+                instruction: "Dari seluruh kisah perjuangan Nabi di Mekah, sifat atau tindakan mana yang paling menyentuh hatimu? Jelaskan alasannya dan tuliskan satu janji pada dirimu sendiri untuk mencoba meneladaninya."
+            },
+            // KELAS 7 - BAB 2
+            { 
+                title: "Bab 2 - Tugas 1 : Piagam Madinah, Piagam Cinta untuk Semua", 
+                instruction: "Sebutkan tiga kelompok utama masyarakat Madinah. Jelaskan mengapa Nabi Muhammad Saw. merasa perlu membuat perjanjian dengan kaum Yahudi, dan pilih satu isi Piagam Madinah yang paling penting untuk diterapkan di Indonesia serta berikan alasannya."
+            },
+            { 
+                title: "Bab 2 - Tugas 2 : Indahnya Berbagi Cinta (Muhajirin & Anshar)", 
+                instruction: "Jelaskan siapa kaum Muhajirin dan kaum Anshar serta ceritakan contoh pengorbanan mereka. Tuliskan sebuah surat sambutan singkat dari seorang sahabat Anshar kepada sahabat Muhajirin yang baru tiba."
+            },
+            { 
+                title: "Bab 2 - Tugas 3 : Hikmah di Balik Kemenangan dan Ujian", 
+                instruction: "Jelaskan pelajaran pertolongan Allah dari Perang Badar, pelajaran ketaatan dari Tragedi Uhud, dan bagaimana peristiwa Fathu Makkah menunjukkan puncak ajaran cinta dan pengampunan."
+            },
+            // KELAS 7 - BAB 3
+            { 
+                title: "Bab 3 - Tugas 1 : Profil Pemimpin Pilihan", 
+                instruction: "Lengkapi tabel profil keempat Khulafaurrasyidin (Abu Bakar, Umar, Utsman, Ali) meliputi cara terpilih, sifat utama yang penuh cinta, dan satu prestasi puncak."
+            },
+            { 
+                title: "Bab 3 - Tugas 2 : Inovasi yang Lahir dari Cinta", 
+                instruction: "Pilih salah satu inovasi masa Khulafaurrasyidin (Pengumpulan Al-Qur'an, Kalender Hijriyah, atau Mushaf Utsmani). Jelaskan mengapa inovasi tersebut penting dan bagaimana hal itu menunjukkan cinta pemimpin kepada umat."
+            },
+            { 
+                title: "Bab 3 - Tugas 3 : Belajar Musyawarah Penuh Cinta", 
+                instruction: "Jelaskan apa yang terjadi jika kaum Muhajirin dan Anshar tidak mau bermusyawarah di Tsaqifah Bani Saidah, dan jelaskan wujud cinta dari sikap legawa kaum Anshar."
+            },
+            // KELAS 7 - BAB 4
+            { 
+                title: "Bab 4 - Tugas 1 : Dari Syura ke Monarki", 
+                instruction: "Jelaskan peristiwa Amul Jama'ah (Tahun Persatuan), mengapa keputusan Hasan bin Ali didasari cinta persatuan, serta sebutkan perbedaan pemerintahan Khulafaurrasyidin dengan Daulah Umayyah."
+            },
+            { 
+                title: "Bab 4 - Tugas 2 : Jejak Peradaban Gemilang", 
+                instruction: "Sebutkan dua contoh kemajuan arsitektur/administrasi Daulah Umayyah dan jelaskan mengapa kebijakan Arabisasi penting dalam membangun peradaban yang kuat."
+            },
+            { 
+                title: "Bab 4 - Tugas 3 : Kartu Identitas Ilmuwan", 
+                instruction: "Buatlah 'Kartu Identitas Ilmuwan' untuk salah satu tokoh masa Daulah Umayyah (Nama Tokoh, Bidang Keahlian, Karya Terbesar, Sikap Cinta Ilmu)."
+            },
+            // KELAS 7 - BAB 5
+            { 
+                title: "Bab 5 - Tugas 1 : Transformasi yang Lahir dari Cinta", 
+                instruction: "Sebutkan dua contoh perubahan gaya hidup Umar bin Abdul Aziz sebelum dan sesudah menjadi khalifah, serta tuliskan kalimat dukungan dari istrinya, Fatimah binti Abdul Malik."
+            },
+            { 
+                title: "Bab 5 - Tugas 2 : Kebijakan Penuh Keadilan", 
+                instruction: "Pilih salah satu kebijakan reformis Umar bin Abdul Aziz dan jelaskan bagaimana hal tersebut menunjukkan cinta dan keadilan kepada rakyat."
+            },
+            { 
+                title: "Bab 5 - Tugas 3 : Pemimpin Idolaku", 
+                instruction: "Sebutkan tiga sifat Umar bin Abdul Aziz yang harus dimiliki pemimpin masa kini, jelaskan alasannya, dan tuliskan doa singkat untuk para pemimpin kita."
+            }
+        ],
+        "8": [
+            // KELAS 8 - BAB 1
+            {
+                title: "Bab 1 - Tugas 1 : Menganalisis Akar Cinta Perjuangan",
+                instruction: "Jelaskan bagaimana rasa cinta pada keadilan dan kebenaran ajaran Islam mendorong ulama/kelompok menginginkan perubahan atas kekecewaan terhadap Daulah Umayyah. Jelaskan pula bagaimana strategi gerakan propaganda Bani Hasyim menunjukkan ikatan cinta masyarakat kepada keluarga Nabi Muhammad Saw."
+            },
+            {
+                title: "Bab 1 - Tugas 2 : Meneladani Cinta dalam Proses",
+                instruction: "Buatlah timeline (garis waktu) sederhana proses berdirinya Daulah Abbasiyah dari Ali bin Abdullah hingga Abul Abbas As-Saffah, sertakan nilai cinta perjuangan di setiap titik penting."
+            },
+            {
+                title: "Bab 1 - Tugas 3 : Mengidentifikasi Wujud Cinta Pemimpin",
+                instruction: "Jodohkan kemajuan Daulah Abbasiyah (Baitul Hikmah, Kota Baghdad, Sektor perdagangan/pertanian) dengan wujud cinta para khalifah kepada ilmu, seni, dan kemakmuran rakyat."
+            },
+            {
+                title: "Bab 1 - Tugas 4 : Refleksi Diri",
+                instruction: "Tulislah refleksi singkat (3-5 kalimat) tentang bagaimana kamu akan menunjukkan rasa cinta pada ilmu pengetahuan untuk membangun masa depan bangsa Indonesia."
+            },
+            // KELAS 8 - BAB 2
+            {
+                title: "Bab 2 - Tugas 1 : Kartu Profil Ilmuwan Penebar Cinta",
+                instruction: "Pilih salah satu ilmuwan kedokteran/filsafat (Ibnu Sina, Ar-Razi, Al-Kindi, Al-Ghazali) dan buat Kartu Profil berisi Nama, Bidang Keahlian, Karya Monumental, serta Wujud Cintanya pada kemanusiaan/kebenaran."
+            },
+            {
+                title: "Bab 2 - Tugas 2 : Merenungi Mutiara Cinta Para Ulama",
+                instruction: "Simpulkan dalamnya rasa cinta Imam Syafi'i kepada Rasulullah dari pernyataan 'Apabila hadis itu sah, itulah mazhabku...' dan jelaskan bagaimana sikap rendah hati menjadi bukti cinta seorang penuntut ilmu."
+            },
+            {
+                title: "Bab 2 - Tugas 3 : Peta Jaringan Cinta Ilmu",
+                instruction: "Buat peta konsep hubungan antara: Cinta kepada Rasulullah → Semangat Mencari Hadis → Lahirnya Kitab Hadis (Kutubussittah) → Terjaganya Ajaran Islam."
+            },
+            {
+                title: "Bab 2 - Tugas 4 : Ikrar Cinta Sang Pembelajar",
+                instruction: "Tulislah 'Ikrar Cinta' (3-5 kalimat) yang berisi janjimu untuk menuntut ilmu dengan semangat cinta demi kemajuan agama dan bangsa."
+            },
+            // KELAS 8 - BAB 3
+            {
+                title: "Bab 3 - Tugas 1 : Menganalisis Pentingnya Cinta Persatuan",
+                instruction: "Jelaskan mengapa perpecahan internal (seperti kondisi Daulah Fatimiyah) membuat negara lemah dan hubungkan dengan pentingnya memupuk cinta persatuan, serta strategi Shalahuddin menyatukan wilayah muslim."
+            },
+            {
+                title: "Bab 3 - Tugas 2 : Mengidentifikasi Wujud Cinta pada Negara",
+                instruction: "Sebutkan satu contoh kemajuan pendidikan dan militer Daulah Ayyubiyah, lalu jelaskan bagaimana hal tersebut merupakan wujud cinta Shalahuddin pada keamanan dan kemajuan negara."
+            },
+            {
+                title: "Bab 3 - Tugas 3 : Simulasi Dialog Penuh Cinta",
+                instruction: "Tulislah dialog singkat antara kamu (Jurnalis) dan Shalahuddin (Sultan) mengenai alasan Sultan bersikap toleran dan penuh cinta kasih kepada penduduk non-muslim di Yerusalem."
+            },
+            {
+                title: "Bab 3 - Tugas 4 : Refleksi Cinta Tanah Airku",
+                instruction: "Tuliskan 3 cara konkret bagaimana kamu menunjukkan rasa cintamu pada tanah air Indonesia dalam kehidupan sehari-hari."
+            },
+            // KELAS 8 - BAB 4
+            {
+                title: "Bab 4 - Tugas 1 : Membandingkan Gaya Kepemimpinan dengan Cinta",
+                instruction: "Isilah perbandingan gaya kepemimpinan Sultan Shalahuddin, Al-Adil, dan Al-Kamil. Jelaskan mengapa gaya mereka berbeda dan apakah wujud cinta pada negara bisa berubah sesuai tantangan zaman."
+            },
+            {
+                title: "Bab 4 - Tugas 2 : Menyelami Samudra Cinta Sang Sufi",
+                instruction: "Tuliskan 2 bait Qasidah Burdah oleh Imam Al-Bushiri beserta terjemahannya, dan ceritakan perasaan cinta yang kamu rasakan terhadap Rasulullah Saw."
+            },
+            {
+                title: "Bab 4 - Tugas 3 : Mengapresiasi Cinta pada Kebenaran",
+                instruction: "Ambil pelajaran dari kisah As-Suhrawardi tentang keberanian berpendapat dan pentingnya berdiskusi dengan cara yang baik (tabayyun)."
+            },
+            {
+                title: "Bab 4 - Tugas 4 : Merancang Piagam Penghargaan",
+                instruction: "Rancanglah sebuah 'Piagam Penghargaan' untuk salah satu tokoh dari Bab 4 (sultan/ilmuwan) lengkap dengan nama, gelar, dan alasan kontribusinya."
+            },
+            // KELAS 8 - BAB 5
+            {
+                title: "Bab 5 - Tugas 1 : Analisis Kepemimpinan Perempuan Pemberani",
+                instruction: "Analisis tantangan Sultanah Shajar Ad-Durr sebagai pemimpin perempuan dan bagaimana tindakannya menunjukkan cinta serta tanggung jawab besar terhadap negara."
+            },
+            {
+                title: "Bab 5 - Tugas 2 : Merancang Strategi Ain Jalut",
+                instruction: "Gambarkan atau jelaskan taktik perang untuk mengalahkan Mongol ala pasukan komandan Sultan Baybars (misal: 'Taktik Jebakan Cinta Tanah Air')."
+            },
+            {
+                title: "Bab 5 - Tugas 3 : Bukti Cinta pada Keindahan",
+                instruction: "Jelaskan salah satu arsitektur peninggalan Mamluk (misal: Masjid Sultan Hasan) dan bagaimana bangunan itu menjadi bukti cinta sultan pada seni dan keabadian."
+            },
+            {
+                title: "Bab 5 - Tugas 4 : Surat untuk Pemimpin",
+                instruction: "Tulislah surat singkat (3-5 kalimat) untuk seorang pemimpin agar selalu menjaga amanah yang didasari rasa cinta pada rakyat dan takut kepada Tuhan."
+            }
+        ],
+        "9": [
+            // KELAS 9 - BAB 1
+            { 
+                title: "Bab 1 - Tugas 1 : Peta Konsep Jalur Dakwah Penuh Cinta", 
+                instruction: "Buatlah peta konsep (mind map) yang menjelaskan 6 (enam) jalur masuknya Islam ke Nusantara beserta penjelasan singkat bagaimana jalur tersebut menunjukkan dakwah yang arif." 
+            },
+            { 
+                title: "Bab 1 - Tugas 2 : Analisis Teori dengan Semangat Cinta Ilmu", 
+                instruction: "Bandingkan dua teori masuknya Islam ke Nusantara (Mekah, Gujarat, Persia, Cina) dari segi waktu, pembawa, dan bukti pendukung. Kemukakan teori mana yang lebih kamu yakini beserta alasannya." 
+            },
+            { 
+                title: "Bab 1 - Tugas 3 : Refleksi Pribadi 'Warisan Cinta Para Da'i'", 
+                instruction: "Tuliskan paragraf singkat (3-5 kalimat) tentang pelajaran cinta (pada sesama, tanah air, atau Tuhan) yang bisa kamu teladani dari cara para da'i menyebarkan Islam di Nusantara." 
+            },
+            // KELAS 9 - BAB 2
+            { 
+                title: "Bab 2 - Tugas 1 : Profil Kerajaan Inspiratif", 
+                instruction: "Pilih satu kerajaan Islam (misal: Aceh, Demak, Mataram, Gowa-Tallo) dan buat profil singkat yang mencakup raja terkenal, masa kejayaan, serta kebijakannya yang menunjukkan cinta pada rakyat." 
+            },
+            { 
+                title: "Bab 2 - Tugas 2 : Analisis Semangat Cinta Tanah Air", 
+                instruction: "Jelaskan bentuk perjuangan tokoh pahlawan kerajaan Islam (seperti Sultan Agung atau Sultan Hasanuddin) melawan penjajah, dan mengapa perjuangan mereka merupakan wujud cinta tanah air yang luar biasa." 
+            },
+            { 
+                title: "Bab 2 - Tugas 3 : Pelajaran dari Perpecahan", 
+                instruction: "Jelaskan pelajaran berharga yang bisa diambil dari konflik internal kerajaan (misal: Sultan Ageng Tirtayasa dan Sultan Haji) dan bagaimana rasa cinta persatuan dapat mencegah perpecahan." 
+            },
+            // KELAS 9 - BAB 3
+            { 
+                title: "Bab 3 - Tugas 1 : Visualisasi Ekosistem Cinta di Pesantren", 
+                instruction: "Gambarkan diagram yang menunjukkan hubungan antar 5 komponen pokok pesantren: Kiai, Santri, Masjid, Pondok, dan Kitab Kuning, yang dilandasi cinta ilmu dan penghormatan." 
+            },
+            { 
+                title: "Bab 3 - Tugas 2 : Meneladani Cinta Ulama pada Umat", 
+                instruction: "Tulis biografi singkat pendiri pesantren bersejarah (misal: Tegalsari, Buntet) dan jelaskan motivasi beliau mendirikan pesantren sebagai wujud cinta mendidik masyarakat." 
+            },
+            { 
+                title: "Bab 3 - Tugas 3 : Refleksi Nilai-Nilai Kehidupan Santri", 
+                instruction: "Pilih dua nilai luhur pesantren (kemandirian, kesederhanaan, ukhuwah, ta'dzim) dan jelaskan bagaimana kamu menerapkannya dalam kehidupanmu sebagai pelajar." 
+            },
+            // KELAS 9 - BAB 4
+            { 
+                title: "Bab 4 - Tugas 1 : Menggali Mutiara Islam dalam Tradisi Lokal", 
+                instruction: "Pilih satu suku di Indonesia, sebutkan dua tradisi/kearifan lokalnya, lalu jelaskan nilai-nilai Islam (syukur, doa, sedekah, dll) yang terkandung di dalamnya." 
+            },
+            { 
+                title: "Bab 4 - Tugas 2 : Membandingkan Keindahan dalam Perbedaan", 
+                instruction: "Bandingkan dua tradisi dari dua suku berbeda yang memiliki tujuan serupa (misal: Megengan vs Balimau Kasai) dan tarik pelajaran tentang cinta keberagaman dari perbandingan tersebut." 
+            },
+            { 
+                title: "Bab 4 - Tugas 3 : Poster 'Cinta Budaya Islam Nusantara'", 
+                instruction: "Rancang/tuliskan sebuah slogan singkat, kreatif, dan mengandung pesan cinta pada budaya serta persatuan untuk melestarikan tradisi Islam lokal." 
+            },
+            // KELAS 9 - BAB 5
+            { 
+                title: "Bab 5 - Tugas 1 : Menjodohkan Kearifan Para Wali", 
+                instruction: "Pasangkan atau sebutkan nama Sunan (Kalijaga, Ampel, Giri, Drajat) dengan metode/karya dakwah khasnya (Tembang Pangkur, Wayang, Moh Limo, Permainan Tradisional)." 
+            },
+            { 
+                title: "Bab 5 - Tugas 2 : Analisis Dakwah Melalui Seni dan Budaya", 
+                instruction: "Jelaskan secara singkat (2-3 kalimat) mengapa dakwah melalui seni (wayang/gamelan) sangat efektif dan menunjukkan rasa cinta serta pemahaman terhadap masyarakat." 
+            },
+            { 
+                title: "Bab 5 - Tugas 3 : Refleksi 'Mo Limo' untuk Zaman Sekarang", 
+                instruction: "Pilih satu larangan dari ajaran Moh Limo (Sunan Ampel) dan jelaskan mengapa larangan itu masih sangat relevan untuk dihindari generasi muda saat ini sebagai bentuk cinta diri sendiri." 
+            },
+            // KELAS 9 - BAB 6
+            { 
+                title: "Bab 6 - Tugas 1 : Paspor Intelektual Dua Mutiara Nusantara", 
+                instruction: "Bandingkan daerah asal, karya terkenal, dan kontribusi utama antara Syaikh Abdur Rauf As-Singkili dan Syaikh Muhammad Arsyad Al-Banjari." 
+            },
+            { 
+                title: "Bab 6 - Tugas 2 : Analisis Karya Monumental Penuh Cinta", 
+                instruction: "Jelaskan secara singkat isi kitab Tarjuman al-Mustafid atau Sabilal Muhtadin, dan mengapa menulis rujukan tersebut adalah wujud cinta abadi kepada umat." 
+            },
+            { 
+                title: "Bab 6 - Tugas 3 : Makna Cinta Tanah Air Seorang Ulama", 
+                instruction: "Jelaskan apa yang mendorong kedua ulama ini pulang ke Nusantara setelah belajar puluhan tahun di Mekah/Madinah sebagai bukti cinta tanah air (Hubbul Wathan minal Iman)." 
+            },
+            // KELAS 9 - BAB 7
+            { 
+                title: "Bab 7 - Tugas 1 : Profil Dua Pilar Bangsa", 
+                instruction: "Lengkapi profil gagasan utama pendirian dan wujud cinta pada sesama/tanah air (amal usaha/Resolusi Jihad) dari KH. Ahmad Dahlan dan KH. Hasyim Asy'ari." 
+            },
+            { 
+                title: "Bab 7 - Tugas 2 : Refleksi 'Berbeda Tapi Satu Cinta'", 
+                instruction: "Tuliskan (2-3 kalimat) pendapatmu mengenai pentingnya persatuan antara Muhammadiyah dan NU untuk masa depan Indonesia." 
+            },
+            { 
+                title: "Bab 7 - Tugas 3 : Ikrar Pribadi untuk Indonesia", 
+                instruction: "Tuliskan satu kalimat 'ikrar' atau janji pribadimu sebagai komitmen untuk memberikan kontribusi positif bagi bangsa, terinspirasi dari semangat kedua tokoh besar tersebut." 
+            }
+        ]
+    };
+
+    function handleClassChange() {
+        const classSelect = document.getElementById("student-class").value;
+        const assignmentSelect = document.getElementById("assignment-title");
+        const instructionBox = document.getElementById("instruction-box");
+
+        assignmentSelect.innerHTML = '<option value="" disabled selected>-- Pilih Tugas yang Dikerjakan --</option>';
+        instructionBox.style.display = "none";
+
+        if (!classSelect) {
+            assignmentSelect.disabled = true;
+            checkFormValidity();
+            return;
+        }
+
+        const gradeLevel = classSelect.charAt(0);
+        const availableTasks = tasksByGrade[gradeLevel] || [];
+
+        if (availableTasks.length > 0) {
+            assignmentSelect.disabled = false;
+            availableTasks.forEach(task => {
+                const option = document.createElement("option");
+                option.value = task.title;
+                option.textContent = task.title;
+                assignmentSelect.appendChild(option);
+            });
+        } else {
+            assignmentSelect.disabled = true;
+        }
+
+        checkFormValidity();
+    }
+
+    function showInstruction() {
+        const classSelect = document.getElementById("student-class").value;
+        const selectedTask = document.getElementById("assignment-title").value;
+        const box = document.getElementById("instruction-box");
+        const textSpan = document.getElementById("instruction-text");
+
+        if (!classSelect) {
+            box.style.display = "none";
+            checkFormValidity();
+            return;
+        }
+
+        const gradeLevel = classSelect.charAt(0);
+        const availableTasks = tasksByGrade[gradeLevel] || [];
+        const taskObj = availableTasks.find(t => t.title === selectedTask);
+
+        if (taskObj) {
+            textSpan.innerText = taskObj.instruction;
+            box.style.display = "block";
+        } else {
+            box.style.display = "none";
+        }
+        checkFormValidity();
+    }
+
+    document.getElementById("student-name").addEventListener("input", checkFormValidity);
+    document.getElementById("assignment-answer").addEventListener("input", checkFormValidity);
+
+    function checkFormValidity() {
+        const name = document.getElementById("student-name").value.trim();
+        const sClass = document.getElementById("student-class").value;
+        const title = document.getElementById("assignment-title").value;
+        const answer = document.getElementById("assignment-answer").value.trim();
+        const submitBtn = document.getElementById("submit-btn");
+
+        if (name && sClass && title && answer) {
+            submitBtn.disabled = false;
+        } else {
+            submitBtn.disabled = true;
+        }
+    }
+
+    function submitTask() {
+        const name = document.getElementById("student-name").value.trim();
+        const sClass = document.getElementById("student-class").value;
+        const title = document.getElementById("assignment-title").value;
+        const answer = document.getElementById("assignment-answer").value.trim();
+        const submitBtn = document.getElementById("submit-btn");
+
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Mengirim...";
+
+        const payload = {
+            name: name,
+            class: sClass,
+            materi: title, 
+            score: answer  
+        };
+
+        fetch(SCRIPT_URL_TUGAS, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        }).then(() => {
+            document.getElementById("form-screen").style.display = "none";
+            document.getElementById("success-screen").style.display = "block";
+        }).catch(err => {
+            console.error("Gagal mengirim tugas:", err);
+            alert("Terjadi kesalahan saat mengirim tugas. Silakan coba lagi.");
+            submitBtn.disabled = false;
+            submitBtn.innerText = "Kirim Tugas";
+        });
+    }
+
+    function resetForm() {
+        document.getElementById("student-name").value = "";
+        document.getElementById("student-class").selectedIndex = 0;
+        
+        const assignmentSelect = document.getElementById("assignment-title");
+        assignmentSelect.innerHTML = '<option value="" disabled selected>-- Pilih Kelas Terlebih Dahulu --</option>';
+        assignmentSelect.disabled = true;
+
+        document.getElementById("assignment-answer").value = "";
+        document.getElementById("instruction-box").style.display = "none";
+        document.getElementById("success-screen").style.display = "none";
+        document.getElementById("form-screen").style.display = "block";
+        document.getElementById("submit-btn").innerText = "Kirim Tugas";
+        document.getElementById("submit-btn").disabled = true;
+    }
+</script>
+</body>
+</html>
