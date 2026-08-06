@@ -20,17 +20,17 @@
         }
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
         body { 
-    background-color: var(--bg-color); 
-    color: var(--text-main); 
-    width: 100%;
-    min-height: 100vh;
-    margin: 0;
-    padding: 0;
-    overflow: hidden; 
-    display: flex;                  /* Membuat sistem pengatur posisi aktif */
-    justify-content: center;        /* Memposisikan kuis agar ke tengah secara horizontal */
-    align-items: flex-start;        /* Menjaga posisi kuis tetap di atas (tidak melayang di tengah vertikal) */
-}
+            background-color: var(--bg-color); 
+            color: var(--text-main); 
+            width: 100%;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; 
+            display: flex;                  
+            justify-content: center;        
+            align-items: flex-start;        
+        }
         .container { width: 100%; max-width: 750px; background: var(--card-bg); border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); overflow: hidden; border: 1px solid var(--border); }
         .header { background: linear-gradient(135deg, #059669 0%, #047857 100%); color: white; padding: 30px; text-align: center; }
         .header h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
@@ -63,11 +63,6 @@
         <!-- Form Pengiriman Tugas -->
         <div id="form-screen">
             <div class="form-group">
-                <label for="student-name">Nama Lengkap</label>
-                <input type="text" id="student-name" placeholder="Contoh: Ahmad Fauzan">
-            </div>
-
-            <div class="form-group">
                 <label for="student-class">Pilih Kelas</label>
                 <select id="student-class" onchange="handleClassChange()">
                     <option value="" disabled selected>-- Pilih Kelas Anda --</option>
@@ -79,6 +74,13 @@
                     <option value="8C">8C</option>
                     <option value="9A">9A</option>
                     <option value="9B">9B</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="student-name">Nama Lengkap</label>
+                <select id="student-name" onchange="checkFormValidity()" disabled>
+                    <option value="" disabled selected>-- Pilih Kelas Terlebih Dahulu --</option>
                 </select>
             </div>
 
@@ -96,7 +98,7 @@
 
             <div class="form-group">
                 <label for="assignment-answer">Jawaban / Tautan File Tugas (Google Drive / Teks)</label>
-                <textarea id="assignment-answer" placeholder="Tuliskan jawaban uraian di sini, atau tempelkan (paste) link Google Drive jika mengumpulkan dalam bentuk file dokumen/foto..."></textarea>
+                <textarea id="assignment-answer" placeholder="Tuliskan jawaban uraian di sini, atau tempelkan (paste) link Google Drive jika mengumpulkan dalam bentuk file dokumen/foto..." oninput="checkFormValidity()"></textarea>
             </div>
 
             <button class="btn" id="submit-btn" onclick="submitTask()" disabled>Kirim Tugas</button>
@@ -114,12 +116,23 @@
 
 <script>
     // MASUKKAN URL GOOGLE APPS SCRIPT WEB APP KHUSUS PENUGASAN DI SINI
-    const SCRIPT_URL_TUGAS = 'https://script.google.com/macros/s/AKfycbznd4dKKtXOj5jSbZdxTXF5w3IJMuNZXq2IZCjLfTMyondmtWDhW3ZHi2cOdGSHTbEB/exec';
+    const SCRIPT_URL_TUGAS = 'https://script.google.com/macros/s/AKfycbxd1NA9AJRYBpNcR2d0GW56bMKhbBO7QUA-dIzbcNBtk8m3uvsT467KQ0JIfyvx2BaR/exec';
+
+    // Daftar nama siswa berdasarkan kelas (Silakan sesuaikan daftar nama siswanya)
+    const studentsByClass = {
+        "7A": ["Ahmad Fauzan", "Fatimah Zahra", "Muhammad Rizki", "Siti Aminah"],
+        "7B": ["Abdullah", "Aisyah", "Umar", "Zainab"],
+        "7C": ["Bilal", "Khadijah", "Ali", "Hafshah"],
+        "8A": ["Ibrahim", "Maryam", "Yusuf", "Asiyah"],
+        "8B": ["Sulaiman", "Bilqis", "Zakaria", "Yahya"],
+        "8C": ["Ismail", "Siti Hajar", "Idris", "Luth"],
+        "9A": ["Musa", "Harun", "Syu'aib", "Ayyub"],
+        "9B": ["Daud", "Sulaiman", "Isa", "Maryam"]
+    };
 
     // Daftar tugas lengkap Kelas 7, Kelas 8, dan Kelas 9
     const tasksByGrade = {
         "7": [
-            // KELAS 7 - BAB 1
             { 
                 title: "Bab 1 - Tugas 1 : Menganalisis Cermin Jahiliyah", 
                 instruction: "Pilihlah salah satu kebiasaan buruk masyarakat Jahiliyah (contoh: mengubur anak perempuan, mabuk, berperang antar suku). Jelaskan nilai-nilai cinta yang hilang dari kebiasaan tersebut, sebutkan satu contoh perilaku di zaman sekarang yang mirip, dan cara menolaknya dengan meneladani akhlak cinta Rasulullah Saw."
@@ -132,7 +145,6 @@
                 title: "Bab 1 - Tugas 3 : Menemukan Cinta dalam Diri", 
                 instruction: "Dari seluruh kisah perjuangan Nabi di Mekah, sifat atau tindakan mana yang paling menyentuh hatimu? Jelaskan alasannya dan tuliskan satu janji pada dirimu sendiri untuk mencoba meneladaninya."
             },
-            // KELAS 7 - BAB 2
             { 
                 title: "Bab 2 - Tugas 1 : Piagam Madinah, Piagam Cinta untuk Semua", 
                 instruction: "Sebutkan tiga kelompok utama masyarakat Madinah. Jelaskan mengapa Nabi Muhammad Saw. merasa perlu membuat perjanjian dengan kaum Yahudi, dan pilih satu isi Piagam Madinah yang paling penting untuk diterapkan di Indonesia serta berikan alasannya."
@@ -145,7 +157,6 @@
                 title: "Bab 2 - Tugas 3 : Hikmah di Balik Kemenangan dan Ujian", 
                 instruction: "Jelaskan pelajaran pertolongan Allah dari Perang Badar, pelajaran ketaatan dari Tragedi Uhud, dan bagaimana peristiwa Fathu Makkah menunjukkan puncak ajaran cinta dan pengampunan."
             },
-            // KELAS 7 - BAB 3
             { 
                 title: "Bab 3 - Tugas 1 : Profil Pemimpin Pilihan", 
                 instruction: "Lengkapi tabel profil keempat Khulafaurrasyidin (Abu Bakar, Umar, Utsman, Ali) meliputi cara terpilih, sifat utama yang penuh cinta, dan satu prestasi puncak."
@@ -158,7 +169,6 @@
                 title: "Bab 3 - Tugas 3 : Belajar Musyawarah Penuh Cinta", 
                 instruction: "Jelaskan apa yang terjadi jika kaum Muhajirin dan Anshar tidak mau bermusyawarah di Tsaqifah Bani Saidah, dan jelaskan wujud cinta dari sikap legawa kaum Anshar."
             },
-            // KELAS 7 - BAB 4
             { 
                 title: "Bab 4 - Tugas 1 : Dari Syura ke Monarki", 
                 instruction: "Jelaskan peristiwa Amul Jama'ah (Tahun Persatuan), mengapa keputusan Hasan bin Ali didasari cinta persatuan, serta sebutkan perbedaan pemerintahan Khulafaurrasyidin dengan Daulah Umayyah."
@@ -171,7 +181,6 @@
                 title: "Bab 4 - Tugas 3 : Kartu Identitas Ilmuwan", 
                 instruction: "Buatlah 'Kartu Identitas Ilmuwan' untuk salah satu tokoh masa Daulah Umayyah (Nama Tokoh, Bidang Keahlian, Karya Terbesar, Sikap Cinta Ilmu)."
             },
-            // KELAS 7 - BAB 5
             { 
                 title: "Bab 5 - Tugas 1 : Transformasi yang Lahir dari Cinta", 
                 instruction: "Sebutkan dua contoh perubahan gaya hidup Umar bin Abdul Aziz sebelum dan sesudah menjadi khalifah, serta tuliskan kalimat dukungan dari istrinya, Fatimah binti Abdul Malik."
@@ -186,7 +195,6 @@
             }
         ],
         "8": [
-            // KELAS 8 - BAB 1
             {
                 title: "Bab 1 - Tugas 1 : Menganalisis Akar Cinta Perjuangan",
                 instruction: "Jelaskan bagaimana rasa cinta pada keadilan dan kebenaran ajaran Islam mendorong ulama/kelompok menginginkan perubahan atas kekecewaan terhadap Daulah Umayyah. Jelaskan pula bagaimana strategi gerakan propaganda Bani Hasyim menunjukkan ikatan cinta masyarakat kepada keluarga Nabi Muhammad Saw."
@@ -203,7 +211,6 @@
                 title: "Bab 1 - Tugas 4 : Refleksi Diri",
                 instruction: "Tulislah refleksi singkat (3-5 kalimat) tentang bagaimana kamu akan menunjukkan rasa cinta pada ilmu pengetahuan untuk membangun masa depan bangsa Indonesia."
             },
-            // KELAS 8 - BAB 2
             {
                 title: "Bab 2 - Tugas 1 : Kartu Profil Ilmuwan Penebar Cinta",
                 instruction: "Pilih salah satu ilmuwan kedokteran/filsafat (Ibnu Sina, Ar-Razi, Al-Kindi, Al-Ghazali) dan buat Kartu Profil berisi Nama, Bidang Keahlian, Karya Monumental, serta Wujud Cintanya pada kemanusiaan/kebenaran."
@@ -220,7 +227,6 @@
                 title: "Bab 2 - Tugas 4 : Ikrar Cinta Sang Pembelajar",
                 instruction: "Tulislah 'Ikrar Cinta' (3-5 kalimat) yang berisi janjimu untuk menuntut ilmu dengan semangat cinta demi kemajuan agama dan bangsa."
             },
-            // KELAS 8 - BAB 3
             {
                 title: "Bab 3 - Tugas 1 : Menganalisis Pentingnya Cinta Persatuan",
                 instruction: "Jelaskan mengapa perpecahan internal (seperti kondisi Daulah Fatimiyah) membuat negara lemah dan hubungkan dengan pentingnya memupuk cinta persatuan, serta strategi Shalahuddin menyatukan wilayah muslim."
@@ -237,7 +243,6 @@
                 title: "Bab 3 - Tugas 4 : Refleksi Cinta Tanah Airku",
                 instruction: "Tuliskan 3 cara konkret bagaimana kamu menunjukkan rasa cintamu pada tanah air Indonesia dalam kehidupan sehari-hari."
             },
-            // KELAS 8 - BAB 4
             {
                 title: "Bab 4 - Tugas 1 : Membandingkan Gaya Kepemimpinan dengan Cinta",
                 instruction: "Isilah perbandingan gaya kepemimpinan Sultan Shalahuddin, Al-Adil, dan Al-Kamil. Jelaskan mengapa gaya mereka berbeda dan apakah wujud cinta pada negara bisa berubah sesuai tantangan zaman."
@@ -254,7 +259,6 @@
                 title: "Bab 4 - Tugas 4 : Merancang Piagam Penghargaan",
                 instruction: "Rancanglah sebuah 'Piagam Penghargaan' untuk salah satu tokoh dari Bab 4 (sultan/ilmuwan) lengkap dengan nama, gelar, dan alasan kontribusinya."
             },
-            // KELAS 8 - BAB 5
             {
                 title: "Bab 5 - Tugas 1 : Analisis Kepemimpinan Perempuan Pemberani",
                 instruction: "Analisis tantangan Sultanah Shajar Ad-Durr sebagai pemimpin perempuan dan bagaimana tindakannya menunjukkan cinta serta tanggung jawab besar terhadap negara."
@@ -273,7 +277,6 @@
             }
         ],
         "9": [
-            // KELAS 9 - BAB 1
             { 
                 title: "Bab 1 - Tugas 1 : Peta Konsep Jalur Dakwah Penuh Cinta", 
                 instruction: "Buatlah peta konsep (mind map) yang menjelaskan 6 (enam) jalur masuknya Islam ke Nusantara beserta penjelasan singkat bagaimana jalur tersebut menunjukkan dakwah yang arif." 
@@ -286,7 +289,6 @@
                 title: "Bab 1 - Tugas 3 : Refleksi Pribadi 'Warisan Cinta Para Da'i'", 
                 instruction: "Tuliskan paragraf singkat (3-5 kalimat) tentang pelajaran cinta (pada sesama, tanah air, atau Tuhan) yang bisa kamu teladani dari cara para da'i menyebarkan Islam di Nusantara." 
             },
-            // KELAS 9 - BAB 2
             { 
                 title: "Bab 2 - Tugas 1 : Profil Kerajaan Inspiratif", 
                 instruction: "Pilih satu kerajaan Islam (misal: Aceh, Demak, Mataram, Gowa-Tallo) dan buat profil singkat yang mencakup raja terkenal, masa kejayaan, serta kebijakannya yang menunjukkan cinta pada rakyat." 
@@ -299,7 +301,6 @@
                 title: "Bab 2 - Tugas 3 : Pelajaran dari Perpecahan", 
                 instruction: "Jelaskan pelajaran berharga yang bisa diambil dari konflik internal kerajaan (misal: Sultan Ageng Tirtayasa dan Sultan Haji) dan bagaimana rasa cinta persatuan dapat mencegah perpecahan." 
             },
-            // KELAS 9 - BAB 3
             { 
                 title: "Bab 3 - Tugas 1 : Visualisasi Ekosistem Cinta di Pesantren", 
                 instruction: "Gambarkan diagram yang menunjukkan hubungan antar 5 komponen pokok pesantren: Kiai, Santri, Masjid, Pondok, dan Kitab Kuning, yang dilandasi cinta ilmu dan penghormatan." 
@@ -312,7 +313,6 @@
                 title: "Bab 3 - Tugas 3 : Refleksi Nilai-Nilai Kehidupan Santri", 
                 instruction: "Pilih dua nilai luhur pesantren (kemandirian, kesederhanaan, ukhuwah, ta'dzim) dan jelaskan bagaimana kamu menerapkannya dalam kehidupanmu sebagai pelajar." 
             },
-            // KELAS 9 - BAB 4
             { 
                 title: "Bab 4 - Tugas 1 : Menggali Mutiara Islam dalam Tradisi Lokal", 
                 instruction: "Pilih satu suku di Indonesia, sebutkan dua tradisi/kearifan lokalnya, lalu jelaskan nilai-nilai Islam (syukur, doa, sedekah, dll) yang terkandung di dalamnya." 
@@ -325,7 +325,6 @@
                 title: "Bab 4 - Tugas 3 : Poster 'Cinta Budaya Islam Nusantara'", 
                 instruction: "Rancang/tuliskan sebuah slogan singkat, kreatif, dan mengandung pesan cinta pada budaya serta persatuan untuk melestarikan tradisi Islam lokal." 
             },
-            // KELAS 9 - BAB 5
             { 
                 title: "Bab 5 - Tugas 1 : Menjodohkan Kearifan Para Wali", 
                 instruction: "Pasangkan atau sebutkan nama Sunan (Kalijaga, Ampel, Giri, Drajat) dengan metode/karya dakwah khasnya (Tembang Pangkur, Wayang, Moh Limo, Permainan Tradisional)." 
@@ -338,7 +337,6 @@
                 title: "Bab 5 - Tugas 3 : Refleksi 'Mo Limo' untuk Zaman Sekarang", 
                 instruction: "Pilih satu larangan dari ajaran Moh Limo (Sunan Ampel) dan jelaskan mengapa larangan itu masih sangat relevan untuk dihindari generasi muda saat ini sebagai bentuk cinta diri sendiri." 
             },
-            // KELAS 9 - BAB 6
             { 
                 title: "Bab 6 - Tugas 1 : Paspor Intelektual Dua Mutiara Nusantara", 
                 instruction: "Bandingkan daerah asal, karya terkenal, dan kontribusi utama antara Syaikh Abdur Rauf As-Singkili dan Syaikh Muhammad Arsyad Al-Banjari." 
@@ -351,7 +349,6 @@
                 title: "Bab 6 - Tugas 3 : Makna Cinta Tanah Air Seorang Ulama", 
                 instruction: "Jelaskan apa yang mendorong kedua ulama ini pulang ke Nusantara setelah belajar puluhan tahun di Mekah/Madinah sebagai bukti cinta tanah air (Hubbul Wathan minal Iman)." 
             },
-            // KELAS 9 - BAB 7
             { 
                 title: "Bab 7 - Tugas 1 : Profil Dua Pilar Bangsa", 
                 instruction: "Lengkapi profil gagasan utama pendirian dan wujud cinta pada sesama/tanah air (amal usaha/Resolusi Jihad) dari KH. Ahmad Dahlan dan KH. Hasyim Asy'ari." 
@@ -369,18 +366,33 @@
 
     function handleClassChange() {
         const classSelect = document.getElementById("student-class").value;
+        const studentNameSelect = document.getElementById("student-name");
         const assignmentSelect = document.getElementById("assignment-title");
         const instructionBox = document.getElementById("instruction-box");
 
+        // Reset Dropdowns
+        studentNameSelect.innerHTML = '<option value="" disabled selected>-- Pilih Nama Anda --</option>';
         assignmentSelect.innerHTML = '<option value="" disabled selected>-- Pilih Tugas yang Dikerjakan --</option>';
         instructionBox.style.display = "none";
 
         if (!classSelect) {
+            studentNameSelect.disabled = true;
             assignmentSelect.disabled = true;
             checkFormValidity();
             return;
         }
 
+        // Enable and Populate Student Names based on Class
+        studentNameSelect.disabled = false;
+        const students = studentsByClass[classSelect] || [];
+        students.forEach(name => {
+            const option = document.createElement("option");
+            option.value = name;
+            option.textContent = name;
+            studentNameSelect.appendChild(option);
+        });
+
+        // Enable and Populate Assignments based on Grade Level
         const gradeLevel = classSelect.charAt(0);
         const availableTasks = tasksByGrade[gradeLevel] || [];
 
@@ -424,17 +436,14 @@
         checkFormValidity();
     }
 
-    document.getElementById("student-name").addEventListener("input", checkFormValidity);
-    document.getElementById("assignment-answer").addEventListener("input", checkFormValidity);
-
     function checkFormValidity() {
-        const name = document.getElementById("student-name").value.trim();
+        const sName = document.getElementById("student-name").value;
         const sClass = document.getElementById("student-class").value;
         const title = document.getElementById("assignment-title").value;
         const answer = document.getElementById("assignment-answer").value.trim();
         const submitBtn = document.getElementById("submit-btn");
 
-        if (name && sClass && title && answer) {
+        if (sName && sClass && title && answer) {
             submitBtn.disabled = false;
         } else {
             submitBtn.disabled = true;
@@ -442,7 +451,7 @@
     }
 
     function submitTask() {
-        const name = document.getElementById("student-name").value.trim();
+        const sName = document.getElementById("student-name").value;
         const sClass = document.getElementById("student-class").value;
         const title = document.getElementById("assignment-title").value;
         const answer = document.getElementById("assignment-answer").value.trim();
@@ -452,7 +461,7 @@
         submitBtn.innerText = "Mengirim...";
 
         const payload = {
-            name: name,
+            name: sName,
             class: sClass,
             materi: title, 
             score: answer  
@@ -475,9 +484,12 @@
     }
 
     function resetForm() {
-        document.getElementById("student-name").value = "";
         document.getElementById("student-class").selectedIndex = 0;
         
+        const studentNameSelect = document.getElementById("student-name");
+        studentNameSelect.innerHTML = '<option value="" disabled selected>-- Pilih Kelas Terlebih Dahulu --</option>';
+        studentNameSelect.disabled = true;
+
         const assignmentSelect = document.getElementById("assignment-title");
         assignmentSelect.innerHTML = '<option value="" disabled selected>-- Pilih Kelas Terlebih Dahulu --</option>';
         assignmentSelect.disabled = true;
