@@ -271,8 +271,19 @@
             studentNameSelect.appendChild(option);
         });
 
-        // Populate Tugas Berdasarkan Jenjang Kelas (Karakter pertama kelas, misal "7A" -> "7")
-        const gradeLevel = classSelect.charAt(0);
+        // Deteksi jenjang kelas secara akurat (Mendukung Angka & Romawi VII, VIII, IX)
+        let gradeLevel = "9";
+        const upperClass = classSelect.toUpperCase();
+        if (upperClass.includes("7") || upperClass.includes("VII")) {
+            gradeLevel = "7";
+        } else if (upperClass.includes("8") || upperClass.includes("VIII")) {
+            gradeLevel = "8";
+        } else if (upperClass.includes("9") || upperClass.includes("IX")) {
+            gradeLevel = "9";
+        } else {
+            gradeLevel = classSelect.charAt(0);
+        }
+
         const availableTasks = tasksByGrade[gradeLevel] || [];
 
         if (availableTasks.length > 0) {
@@ -312,7 +323,18 @@
             return;
         }
 
-        const gradeLevel = classSelect.charAt(0);
+        let gradeLevel = "9";
+        const upperClass = classSelect.toUpperCase();
+        if (upperClass.includes("7") || upperClass.includes("VII")) {
+            gradeLevel = "7";
+        } else if (upperClass.includes("8") || upperClass.includes("VIII")) {
+            gradeLevel = "8";
+        } else if (upperClass.includes("9") || upperClass.includes("IX")) {
+            gradeLevel = "9";
+        } else {
+            gradeLevel = classSelect.charAt(0);
+        }
+
         const availableTasks = tasksByGrade[gradeLevel] || [];
         const taskObj = availableTasks.find(t => t.title === selectedTask);
 
